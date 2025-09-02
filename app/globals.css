@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-midnight: #0b0f14;
+  --color-abyss: #0f1620;
+  --color-storm: #131c28;
+  --color-skyfog: #e6eef6;
+  --color-steel: #8aa0b2;
+  --color-skyflare: #4ea3ff;
+  --color-emerald: #7ee787;
+  --color-crimson: #ff6b6b;
+  --color-azure-light: #4ea3ff59;
+  --color-graphite: #1f2a38;
+  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.03) inset;
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(180deg, #0f1620, #131c28);
+}
+
+.bg-gradient-hover:hover {
+  background: linear-gradient(180deg, var(--color-storm), var(--color-abyss));
+}
+
+.logo-dot {
+  box-shadow: 0 0 0 6px var(--color-azure-light);
+}
