@@ -1,3 +1,6 @@
+"use client";
+
+import { useSidebar } from "@/context/SidebarContext";
 import {
   SignedIn,
   SignedOut,
@@ -5,20 +8,41 @@ import {
   SignOutButton,
   UserButton,
 } from "@clerk/nextjs";
-import { Search } from "lucide-react";
+import { MenuIcon, Search } from "lucide-react";
 import Link from "next/link";
+import CreateFolderModal from "./CreateFolderModal";
+import { useState } from "react";
+import FileUploadModal from "./FileUploadModal";
 
 function Header() {
+  // State For Toggle Create Folder Modal
+  const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
+  // State For Toggle File Upload Modal
+  const [openFileUploadModal, setOpenFileUploadModal] =
+    useState<boolean>(false);
+
+  // For Toggle Responsive Sidebar
+  const { toggleSidebar } = useSidebar();
+
   return (
     <header className="h-16 w-full fixed top-0 left-0 bg-gradient-dark border border-graphite shadow-elevated z-50 px-5 flex items-center justify-between gap-5">
-      {/* Logo */}
-      <Link
-        href={"/"}
-        className="text-skyfog flex items-center gap-2.5 font-bold"
-      >
-        <span className="w-2.5 h-2.5 bg-skyflare rounded-full logo-dot"></span>
-        Drive
-      </Link>
+      <div className="flex items-center gap-4">
+        {/* Sidebar Toggle Button */}
+        <div
+          className="w-8 h-8 rounded-xs bg-slate-800 flex justify-center items-center shadow-elevated cursor-pointer md:hidden"
+          onClick={toggleSidebar}
+        >
+          <MenuIcon color="white" size={20} />
+        </div>
+        {/* Logo */}
+        <Link
+          href={"/"}
+          className="text-skyfog flex items-center gap-2.5 font-bold"
+        >
+          <span className="w-2.5 h-2.5 bg-skyflare rounded-full logo-dot"></span>
+          Drive
+        </Link>
+      </div>
 
       {/* Search Bar */}
       <div className="hidden md:flex items-center border border-graphite grow rounded-2xl gap-2.5 bg-storm py-2.5 px-3">
@@ -38,12 +62,18 @@ function Header() {
       {/* Actions */}
       <div className="flex items-center gap-2.5">
         <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
-          <button className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer">
+          <button
+            onClick={() => setOpenFolderModal(true)}
+            className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+          >
             New Folder
           </button>
 
-          <button className="bg-skyflare text-white border-none py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer">
-            New Folder
+          <button
+            onClick={() => setOpenFileUploadModal(true)}
+            className="bg-skyflare text-white border-none py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+          >
+            Upload
           </button>
         </div>
 
@@ -59,6 +89,16 @@ function Header() {
           <UserButton />
         </SignedIn>
       </div>
+
+      {/* Create Folder Modal */}
+      {openFolderModal && (
+        <CreateFolderModal setOpenFolderModal={setOpenFolderModal} />
+      )}
+
+      {/* File Upload Modal */}
+      {openFileUploadModal && (
+        <FileUploadModal setOpenFileUploadModal={setOpenFileUploadModal} />
+      )}
     </header>
   );
 }
