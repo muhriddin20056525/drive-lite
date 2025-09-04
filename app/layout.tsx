@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { ClerkProvider } from "@clerk/nextjs";
 import SidebarProvider from "@/context/SidebarContext";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,8 @@ export default function RootLayout({
             <Header />
             <Sidebar />
           </SidebarProvider>
-          {children}
+          <div className="absolute top-16 md:left-64">{children}</div>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

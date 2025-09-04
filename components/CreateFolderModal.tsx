@@ -1,12 +1,39 @@
 import { modalVariants } from "@/constants/variants";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { Dispatch, SetStateAction } from "react";
+import { Loader2 } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
+import toast from "react-hot-toast";
 
 type CreateFolderModalProps = {
   setOpenFolderModal: Dispatch<SetStateAction<boolean>>;
 };
 
 function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
+  // State For Get Input Value
+  const [name, setName] = useState<string>("");
+  // State For Create Folder Loading
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Create Folder Function
+  const handleCreateFolder = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.post("/api/folder", { name });
+      toast.success(data.message || "Folder Created Successfully");
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Unexpected error occurred!");
+      }
+    } finally {
+      setLoading(false);
+      setName("");
+      setOpenFolderModal(false);
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -39,6 +66,8 @@ function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
           placeholder="Enter folder name..."
           className="w-full rounded-lg px-3 py-2 bg-storm border border-graphite text-skyfog
           placeholder-steel focus:outline-none focus:ring-2 focus:ring-skyflare mb-6"
+          onChange={(e) => setName(e.target.value)}
+          value={name}
         />
 
         {/* Buttons */}
@@ -49,8 +78,11 @@ function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
           >
             Cancel
           </button>
-          <button className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition">
-            Create
+          <button
+            onClick={handleCreateFolder}
+            className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition flex items-center gap-2"
+          >
+            Create {loading && <Loader2 className="animate-spin" />}
           </button>
         </div>
       </motion.div>
