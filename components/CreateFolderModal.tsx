@@ -1,9 +1,9 @@
 import { modalVariants } from "@/constants/variants";
+import { useFolders } from "@/hooks/useFolders";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
-import toast from "react-hot-toast";
 
 type CreateFolderModalProps = {
   setOpenFolderModal: Dispatch<SetStateAction<boolean>>;
@@ -12,26 +12,15 @@ type CreateFolderModalProps = {
 function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
   // State For Get Input Value
   const [name, setName] = useState<string>("");
-  // State For Create Folder Loading
-  const [loading, setLoading] = useState<boolean>(false);
+
+  // Get Loading And CreateFolder Function From Context
+  const { isCreating, createFolder } = useFolders();
 
   // Create Folder Function
   const handleCreateFolder = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.post("/api/folder", { name });
-      toast.success(data.message || "Folder Created Successfully");
-    } catch (error: any) {
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Unexpected error occurred!");
-      }
-    } finally {
-      setLoading(false);
-      setName("");
-      setOpenFolderModal(false);
-    }
+    createFolder(name);
+    setName("");
+    setOpenFolderModal(false);
   };
 
   return (
@@ -82,7 +71,7 @@ function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
             onClick={handleCreateFolder}
             className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition flex items-center gap-2"
           >
-            Create {loading && <Loader2 className="animate-spin" />}
+            Create {isCreating && <Loader2 className="animate-spin" />}
           </button>
         </div>
       </motion.div>

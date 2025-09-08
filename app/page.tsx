@@ -1,38 +1,37 @@
 "use client";
 
 import FolderCard from "@/components/FolderCard";
-import { IFolder } from "@/types";
-import axios from "axios";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useFolders } from "@/hooks/useFolders";
+import { FolderOpen, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 function Home() {
-  // State For Saving Folder Data
-  const [folders, setFolders] = useState<IFolder[]>([]);
-
-  // Get All Folders From API
-  const handleGetFolders = async () => {
-    try {
-      const { data } = await axios.get("/api/folder");
-      setFolders(data.folders);
-    } catch (error) {
-      console.log("Get All Folders Error: ", error);
-    }
-  };
+  // Get Loading, Folders and GetFolders Function From Context
+  const { isFetching, folders, getFolders } = useFolders();
 
   useEffect(() => {
-    handleGetFolders();
+    getFolders();
   }, []);
 
   return (
-    <div className="p-5">
-      {!folders.length && (
+    <div>
+      {isFetching && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-dark/50">
           <Loader2 className="h-10 w-10 animate-spin text-skyflare" />
         </div>
       )}
 
-      <div className="flex flex-wrap gap-5">
+      {/* Agar folder yo‘q bo‘lsa */}
+      {!isFetching && folders.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <FolderOpen className="h-14 w-14 text-gray-400 mb-4" />
+          <h2 className="text-lg font-semibold text-gray-300">No Data Found</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Try creating a new folder to get started.
+          </p>
+        </div>
+      )}
+      <div className="grid grid-cols-1  md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-5">
         {folders.map((folder) => (
           <FolderCard folder={folder} key={folder.id} />
         ))}

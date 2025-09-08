@@ -39,9 +39,20 @@ export async function POST(req: NextRequest) {
 
 // Get All Folders
 export async function GET(req: NextRequest) {
+  // Get User Id From Clerk
+  const { userId } = await auth();
+
+  // Check User Id
+  if (!userId) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    // Get All Folders
-    const folders = await prisma.folder.findMany({});
+    // Get All Folders This User
+    const folders = await prisma.folder.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
 
     // Return Response To Frontend
     return NextResponse.json({ message: "Get All Folders", folders });
