@@ -2,10 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-// Create Folder
+// Upload File
 export async function POST(req: NextRequest) {
-  // Get Name From Frontend
-  const { name } = await req.json();
+  // Get Data From Frontend
+  const { name, type, url, size } = await req.json();
 
   // Get UserId Form Clerk
   const { userId } = await auth();
@@ -15,30 +15,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  // Check All Fileds
+
+  if (!name || !type || !url || !size) {
+    return NextResponse.json(
+      { message: "All fields (name, type, url, size) are required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Create Folder
-    const newFolder = await prisma.folder.create({
+    // Upload File
+    const newFile = await prisma.file.create({
       data: {
         name,
         userId,
-        type: "folder",
+        type,
+        url,
+        size,
       },
     });
 
     // Return Response To Frontend
     return NextResponse.json({
-      message: "Created New Folder",
-      folder: newFolder,
+      message: "New File Uploaded",
+      file: newFile,
     });
   } catch (error) {
     return NextResponse.json(
-      { message: "Server Error Create Folder", error },
+      { message: "Server Error Upload File", error },
       { status: 500 }
     );
   }
 }
 
-// Get All Folders
+// Get All Files
 export async function GET(req: NextRequest) {
   // Get User Id From Clerk
   const { userId } = await auth();
@@ -49,17 +60,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Get All Folders This User
-    const folders = await prisma.folder.findMany({
+    // Get All Files This User
+    const files = await prisma.file.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
     // Return Response To Frontend
-    return NextResponse.json({ message: "Get All Folders", folders });
+    return NextResponse.json({ message: "Get All Files", files });
   } catch (error) {
     return NextResponse.json(
-      { message: "Server Error Fetch All Folders", error },
+      { message: "Server Error Fetch All Files", error },
       { status: 500 }
     );
   }

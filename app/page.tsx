@@ -21,7 +21,7 @@ function Home() {
         </div>
       )}
 
-      {/* Agar folder yo‘q bo‘lsa */}
+      {/* IF Emty Folders State */}
       {!isFetching && folders.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <FolderOpen className="h-14 w-14 text-gray-400 mb-4" />

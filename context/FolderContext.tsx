@@ -40,14 +40,18 @@ function FolderProvider({ children }: { children: ReactNode }) {
 
   // Create Folder
   const createFolder = async (name: string) => {
+    setIsCreating(true);
     try {
-      setIsCreating(true);
+      if (!name) {
+        toast.error("Enter a folder name");
+        return;
+      }
       // Send Request To Backend
       const { data } = await axios.post("/api/folder", { name });
       // Show Notification
       toast.success(data.message || "Folder Created Successfully");
 
-      // Update Local State For Take Date On Real Time
+      // Update Local State For Take Data On Real Time
       setFolders((prev) => [...prev, data.folder]);
     } catch (error: any) {
       if (error.response?.data?.message) {
@@ -62,6 +66,12 @@ function FolderProvider({ children }: { children: ReactNode }) {
 
   const updateFolder = async (id: string, name: string) => {
     try {
+      // Check Name
+      if (!name) {
+        toast.error("Enter a folder name");
+        return;
+      }
+
       // Send Request To Backend
       const { data } = await axios.put(`/api/folder/${id}`, { name });
 

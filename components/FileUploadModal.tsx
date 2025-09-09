@@ -1,12 +1,70 @@
+"use client";
 import { modalVariants } from "@/constants/variants";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { supabase } from "@/utils/supabase";
+import { Loader2 } from "lucide-react";
+import { useFiles } from "@/hooks/useFiles";
 
 type FileUploadModalProps = {
   setOpenFileUploadModal: Dispatch<SetStateAction<boolean>>;
 };
 
 function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
+  // States For File Data
+  const [fileUrl, setFileUrl] = useState<string>("");
+  const [fileName, setFileName] = useState<string>("");
+  const [fileSize, setFileSize] = useState<number>(0);
+  const [fileType, setFileType] = useState<string>("");
+
+  // State For File Upload Loading
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // useFiles Hook
+  const { uploadFile, isUploading } = useFiles();
+
+  // Change Event For Get File Input Value
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Get File
+    const selectedFile = e.target.files?.[0];
+
+    // Check File
+    if (!selectedFile) {
+      toast.error("Choose A File");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // Generate Name For File
+      const fileName = `${Date.now()}-${selectedFile.name}`;
+
+      // Upload File To Supabase
+      const { data, error } = await supabase.storage
+        .from("drive-lite")
+        .upload(fileName, selectedFile);
+
+      // Returt Error
+      if (error) throw error;
+
+      // Get File Url From Supabase
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("drive-lite").getPublicUrl(fileName);
+
+      // Set Data To File Data States
+      setFileUrl(publicUrl);
+      setFileName(fileName);
+      setFileSize(selectedFile.size);
+      setFileType(selectedFile.type);
+    } catch (error) {
+      console.error("Error File Upload", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -34,13 +92,18 @@ function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
         {/* File Input */}
         <label className="block mb-6">
           <span className="text-steel text-sm mb-2 block">Choose a file</span>
-          <input
-            type="file"
-            className="w-full rounded-lg bg-storm border border-graphite text-skyfog
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="w-full rounded-lg bg-storm border border-graphite text-skyfog
             file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
             file:bg-skyflare file:text-midnight file:font-medium
             hover:file:opacity-90 cursor-pointer focus:outline-none"
-          />
+            />
+
+            {isLoading && <Loader2 className="animate-spin text-skyflare" />}
+          </div>
         </label>
 
         {/* Buttons */}
@@ -51,8 +114,19 @@ function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
           >
             Cancel
           </button>
-          <button className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition">
+          <button
+            onClick={() => {
+              uploadFile(fileName, fileType, fileUrl, fileSize);
+              setFileName("");
+              setFileSize(0);
+              setFileUrl("");
+              setFileType("");
+              setOpenFileUploadModal(false);
+            }}
+            className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition flex items-center gap-2"
+          >
             Upload
+            {isUploading && <Loader2 className="animate-spin" color="white" />}
           </button>
         </div>
       </motion.div>

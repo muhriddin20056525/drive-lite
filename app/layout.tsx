@@ -7,6 +7,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import SidebarProvider from "@/context/SidebarContext";
 import { Toaster } from "react-hot-toast";
 import FolderProvider from "@/context/FolderContext";
+import FileProvider from "@/context/FileContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,14 +36,16 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-midnight`}
         >
           <FolderProvider>
-            <SidebarProvider>
-              <Header />
-              <Sidebar />
-            </SidebarProvider>
-            <div className="absolute top-16 md:left-64 p-5 w-full md:w-[calc(100vw-256px)]">
-              {children}
-            </div>
-            <Toaster />
+            <FileProvider>
+              <SidebarProvider>
+                <Header />
+                <Sidebar />
+              </SidebarProvider>
+              <div className="absolute top-16 md:left-64 p-5 w-full md:w-[calc(100vw-256px)]">
+                {children}
+              </div>
+              <Toaster />
+            </FileProvider>
           </FolderProvider>
         </body>
       </html>

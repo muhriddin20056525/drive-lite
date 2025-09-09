@@ -82,7 +82,6 @@ function FolderCard({ folder }: FolderCardProps) {
 
             <button
               onMouseDown={() => {
-                if (!name) toast.error("Enter a folder name");
                 updateFolder(folder.id, name);
                 setShowEditInput(false);
               }}
