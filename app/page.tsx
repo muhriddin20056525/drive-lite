@@ -1,6 +1,8 @@
 "use client";
 
+import FileCard from "@/components/FileCard";
 import FolderCard from "@/components/FolderCard";
+import { useFiles } from "@/hooks/useFiles";
 import { useFolders } from "@/hooks/useFolders";
 import { FolderOpen, Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -9,8 +11,12 @@ function Home() {
   // Get Loading, Folders and GetFolders Function From Context
   const { isFetching, folders, getFolders } = useFolders();
 
+  // Get Files and Get Files Function From Context
+  const { files, getFiles } = useFiles();
+
   useEffect(() => {
     getFolders();
+    getFiles();
   }, []);
 
   return (
@@ -31,10 +37,23 @@ function Home() {
           </p>
         </div>
       )}
-      <div className="grid grid-cols-1  md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-5">
-        {folders.map((folder) => (
-          <FolderCard folder={folder} key={folder.id} />
-        ))}
+
+      <div>
+        <h2 className="text-skyfog text-2xl mb-4 font-bold">Folders</h2>
+        <div className="grid grid-cols-1  md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-5 mb-5">
+          {folders.map((folder) => (
+            <FolderCard folder={folder} key={folder.id} />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-skyfog text-2xl mb-4 font-bold">Files</h2>
+        <div className="grid grid-cols-1  md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-5">
+          {files.map((file) => (
+            <FileCard key={file.id} file={file} />
+          ))}
+        </div>
       </div>
     </div>
   );

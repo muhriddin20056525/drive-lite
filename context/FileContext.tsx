@@ -6,6 +6,7 @@ import React, { createContext, ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 
 type FileContextType = {
+  files: IFile[];
   isUploading: boolean;
   getFiles: () => void;
   uploadFile: (name: string, type: string, url: string, size: number) => void;
@@ -25,7 +26,7 @@ function FileProvider({ children }: { children: ReactNode }) {
   const getFiles = async () => {
     try {
       const { data } = await axios.get("/api/files");
-      console.log(data);
+      setFiles(data.files);
     } catch (error) {
       console.log("Fetch ALL File Error", error);
     }
@@ -72,7 +73,14 @@ function FileProvider({ children }: { children: ReactNode }) {
 
   return (
     <FileContext.Provider
-      value={{ isUploading, getFiles, uploadFile, updateFile, deleteFile }}
+      value={{
+        files,
+        isUploading,
+        getFiles,
+        uploadFile,
+        updateFile,
+        deleteFile,
+      }}
     >
       {children}
     </FileContext.Provider>
