@@ -7,16 +7,24 @@ import { Download, Edit, File, Star, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import FileIcon from "./FileIcon";
+import { useFiles } from "@/hooks/useFiles";
+import { getFileExtension } from "@/utils/fileExt";
 
 type FileCardProps = {
   file: IFile;
 };
 
 function FileCard({ file }: FileCardProps) {
+  // State For Toggle Edit Input
   const [showEditInput, setShowEditInput] = useState<boolean>(false);
 
-  const router = useRouter();
+  // State For File Name
+  const [fileName, setFileName] = useState<string>("");
 
+  // Get Update And Delete Functions From useFiles Hook
+  const { updateFile, deleteFile } = useFiles();
+
+  const router = useRouter();
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Single Click Handler
@@ -45,6 +53,18 @@ function FileCard({ file }: FileCardProps) {
     setShowEditInput(true);
   };
 
+  // Update File
+  const handleUpdateFile = async (id: string) => {
+    const data = await updateFile(id, fileName);
+
+    if (data) {
+      setShowEditInput(false);
+      setFileName("");
+    } else {
+      setShowEditInput(true);
+    }
+  };
+
   return (
     <div className="w-full grow flex items-center gap-5 bg-gradient-dark py-5 px-5 rounded-[5px] relative group">
       {/* Card Icon */}
@@ -68,6 +88,8 @@ function FileCard({ file }: FileCardProps) {
               type="text"
               autoFocus
               onBlur={() => setShowEditInput(false)}
+              onChange={(e) => setFileName(e.target.value)}
+              value={fileName}
               placeholder="Enter folder name..."
               className="w-[70%] rounded-md px-2 py-1 text-sm
                  bg-storm border border-graphite text-skyfog
@@ -75,17 +97,17 @@ function FileCard({ file }: FileCardProps) {
             />
 
             <button
-              onMouseDown={() => {
-                // updateFolder(folder.id, name);
-                setShowEditInput(false);
-              }}
+              onMouseDown={() => handleUpdateFile(file.id)}
               className="p-1.5 rounded-md bg-graphite hover:bg-storm transition"
             >
               <Edit className="h-5 w-5 text-skyfog" />
             </button>
           </div>
         )}
-        <p className="text-steel">{formatSizeByType(file.size, file.type)}</p>
+        <p className="text-steel">
+          {formatSizeByType(file.size, file.type)} •{" "}
+          {new Date(file.createdAt).toLocaleDateString()}
+        </p>
       </div>
 
       {/* Card Actions */}
@@ -98,9 +120,17 @@ function FileCard({ file }: FileCardProps) {
           <Download width={14} height={14} />
         </button>
 
-        <button className="w-6 h-6 bg-[rgba(255,255,255,0.08)] rounded-full flex justify-center items-center border border-graphite text-steel cursor-pointer">
+        <button
+          onClick={() => deleteFile(file.id)}
+          className="w-6 h-6 bg-[rgba(255,255,255,0.08)] rounded-full flex justify-center items-center border border-graphite text-steel cursor-pointer"
+        >
           <Trash2 width={14} height={14} />
         </button>
+      </div>
+
+      {/* Card Extname */}
+      <div className="absolute bottom-3 right-3 py-1 px-2 rounded-2xl bg-[rgba(255,255,255,0.08)] border border-graphite text-steel uppercase text-xs">
+        {getFileExtension(file.type)}
       </div>
     </div>
   );

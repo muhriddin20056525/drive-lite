@@ -7,6 +7,7 @@ import {
   SignInButton,
   SignOutButton,
   UserButton,
+  useUser,
 } from "@clerk/nextjs";
 import { MenuIcon, Search } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +24,9 @@ function Header() {
 
   // For Toggle Responsive Sidebar
   const { toggleSidebar } = useSidebar();
+
+  // Get User From Clerk
+  const { user } = useUser();
 
   return (
     <header className="h-16 w-full fixed top-0 left-0 bg-gradient-dark border border-graphite shadow-elevated z-50 px-5 flex items-center justify-between gap-5">
@@ -61,25 +65,27 @@ function Header() {
 
       {/* Actions */}
       <div className="flex items-center gap-2.5">
-        <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
-          <button
-            onClick={() => setOpenFolderModal(true)}
-            className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
-          >
-            New Folder
-          </button>
+        {user && (
+          <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
+            <button
+              onClick={() => setOpenFolderModal(true)}
+              className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+            >
+              New Folder
+            </button>
 
-          <button
-            onClick={() => setOpenFileUploadModal(true)}
-            className="bg-skyflare text-white border-none py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
-          >
-            Upload
-          </button>
-        </div>
+            <button
+              onClick={() => setOpenFileUploadModal(true)}
+              className="bg-skyflare text-white border-none py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+            >
+              Upload
+            </button>
+          </div>
+        )}
 
         <SignedOut>
-          <SignInButton>
-            <button className="border border-graphite bg-transparent text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer">
+          <SignInButton mode="modal">
+            <button className="border border-graphite bg-transparent text-white py-2.5 px-6.5 font-semibold rounded-[12px] cursor-pointer hover:bg-abyss">
               Login
             </button>
           </SignInButton>

@@ -65,6 +65,24 @@ function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
     }
   };
 
+  // File Uplaod
+  const handleFileUpload = async (
+    fileName: string,
+    fileType: string,
+    fileUrl: string,
+    fileSize: number
+  ) => {
+    const data = await uploadFile(fileName, fileType, fileUrl, fileSize);
+
+    if (data) {
+      setFileName("");
+      setFileSize(0);
+      setFileUrl("");
+      setFileType("");
+      setOpenFileUploadModal(false);
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -95,6 +113,7 @@ function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
           <div className="flex items-center gap-3">
             <input
               type="file"
+              accept="image/*,video/*,.pdf,.doc,.docx,.xlsx,.txt"
               onChange={handleFileChange}
               className="w-full rounded-lg bg-storm border border-graphite text-skyfog
             file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
@@ -115,14 +134,9 @@ function FileUploadModal({ setOpenFileUploadModal }: FileUploadModalProps) {
             Cancel
           </button>
           <button
-            onClick={() => {
-              uploadFile(fileName, fileType, fileUrl, fileSize);
-              setFileName("");
-              setFileSize(0);
-              setFileUrl("");
-              setFileType("");
-              setOpenFileUploadModal(false);
-            }}
+            onClick={() =>
+              handleFileUpload(fileName, fileType, fileUrl, fileSize)
+            }
             className="px-4 py-2 rounded-lg bg-skyflare text-midnight font-medium hover:opacity-90 transition flex items-center gap-2"
           >
             Upload

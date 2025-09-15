@@ -49,6 +49,18 @@ function FolderCard({ folder }: FolderCardProps) {
     setShowEditInput(true);
   };
 
+  // Update Folder
+  const handleUpdateFolder = async (id: string, name: string) => {
+    const data = await updateFolder(id, name);
+
+    if (data) {
+      setShowEditInput(false);
+      setName("");
+    } else {
+      setShowEditInput(true);
+    }
+  };
+
   return (
     <div className="w-full grow flex items-center gap-5 bg-gradient-dark py-5 px-5 rounded-[5px] relative group">
       {/* Card Icon */}
@@ -81,10 +93,7 @@ function FolderCard({ folder }: FolderCardProps) {
             />
 
             <button
-              onMouseDown={() => {
-                updateFolder(folder.id, name);
-                setShowEditInput(false);
-              }}
+              onMouseDown={() => handleUpdateFolder(folder.id, folder.name)}
               className="p-1.5 rounded-md bg-graphite hover:bg-storm transition"
             >
               <Edit className="h-5 w-5 text-skyfog" />

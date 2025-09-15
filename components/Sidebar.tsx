@@ -15,7 +15,7 @@ function Sidebar() {
     <aside
       className={`w-64 h-[calc(100vh-64px)] bg-gradient-dark fixed top-16 border-r border-graphite p-5 flex flex-col transition-all duration-300 ${
         !isOpen && "-translate-x-full"
-      } md:translate-x-0`}
+      } md:translate-x-0 z-50`}
     >
       {/* Sidebar Links */}
       <ul className="flex flex-col gap-4 grow">

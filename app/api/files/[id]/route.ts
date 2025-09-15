@@ -2,24 +2,24 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-// Delete Single Folder
+// Delete Single File
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Get Folder Id From Params
+  // Get File Id From Params
   const { id } = await params;
 
   try {
-    // Delete Folder
-    const deleteFolder = await prisma.folder.delete({
+    // Delete File
+    const deleteFile = await prisma.file.delete({
       where: { id: Number(id) },
     });
 
     // Return Response To Frontend
     return NextResponse.json({
-      message: "Folder Deleted",
-      folder: deleteFolder,
+      message: "File Deleted",
+      file: deleteFile,
     });
   } catch (error) {
     return NextResponse.json(
@@ -29,15 +29,15 @@ export async function DELETE(
   }
 }
 
-// Edit Single Folder
+// Edit Single File
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Get Folder Id From Params
+  // Get File Id From Params
   const { id } = await params;
 
-  // Get Folder Data From Frontend
+  // Get File Data From Frontend
   const { name } = await req.json();
 
   // Get UserId Form Clerk
@@ -49,20 +49,20 @@ export async function PUT(
   }
 
   // Duplicate Check
-  const existingFolder = await prisma.folder.findFirst({
+  const existingFile = await prisma.file.findFirst({
     where: { userId, name },
   });
 
-  if (existingFolder) {
+  if (existingFile) {
     return NextResponse.json(
-      { message: "Folder with this name already exists" },
+      { message: "File with this name already exists" },
       { status: 400 }
     );
   }
 
   try {
-    // Update Folder
-    const updateFolder = await prisma.folder.update({
+    // Update File
+    const updateFile = await prisma.file.update({
       where: { id: Number(id) },
       data: {
         name,
@@ -71,8 +71,8 @@ export async function PUT(
 
     // Return Response To Frontend
     return NextResponse.json({
-      message: "Folder Updated Successfully",
-      folder: updateFolder,
+      message: "File Updated Successfully",
+      file: updateFile,
     });
   } catch (error) {
     return NextResponse.json(

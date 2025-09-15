@@ -20,6 +20,7 @@ model Folder {
   type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  File      File[]
 }
 
 model File {
@@ -29,6 +30,8 @@ model File {
   url       String
   size      Int
   userId    String
+  folderId  Int?
+  folder    Folder?  @relation(fields: [folderId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

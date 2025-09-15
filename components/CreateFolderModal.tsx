@@ -18,9 +18,12 @@ function CreateFolderModal({ setOpenFolderModal }: CreateFolderModalProps) {
 
   // Create Folder Function
   const handleCreateFolder = async () => {
-    createFolder(name);
-    setName("");
-    setOpenFolderModal(false);
+    const data = await createFolder(name);
+
+    if (data) {
+      setName("");
+      setOpenFolderModal(false);
+    }
   };
 
   return (

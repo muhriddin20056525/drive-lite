@@ -10,8 +10,8 @@ type FolderContextType = {
   isFetching: boolean;
   isCreating: boolean;
   getFolders: () => void;
-  createFolder: (name: string) => Promise<void>;
-  updateFolder: (id: string, name: string) => Promise<void>;
+  createFolder: (name: string) => Promise<boolean>;
+  updateFolder: (id: string, name: string) => Promise<boolean>;
   deleteFolder: (id: string) => Promise<void>;
 };
 
@@ -44,7 +44,7 @@ function FolderProvider({ children }: { children: ReactNode }) {
     try {
       if (!name) {
         toast.error("Enter a folder name");
-        return;
+        return false;
       }
       // Send Request To Backend
       const { data } = await axios.post("/api/folder", { name });
@@ -52,24 +52,27 @@ function FolderProvider({ children }: { children: ReactNode }) {
       toast.success(data.message || "Folder Created Successfully");
 
       // Update Local State For Take Data On Real Time
-      setFolders((prev) => [...prev, data.folder]);
+      setFolders((prev) => [data.folder, ...prev]);
+      return true;
     } catch (error: any) {
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
         toast.error("Unexpected error occurred!");
       }
+      return false;
     } finally {
       setIsCreating(false);
     }
   };
 
+  // Update Folder
   const updateFolder = async (id: string, name: string) => {
     try {
       // Check Name
       if (!name) {
         toast.error("Enter a folder name");
-        return;
+        return false;
       }
 
       // Send Request To Backend
@@ -82,6 +85,8 @@ function FolderProvider({ children }: { children: ReactNode }) {
       setFolders((prev) =>
         prev.map((f) => (f.id === id ? { ...f, name: data.folder.name } : f))
       );
+
+      return true;
     } catch (error: any) {
       console.log("Edit Folder Error: ", error);
       if (error.response?.data?.message) {
@@ -89,9 +94,11 @@ function FolderProvider({ children }: { children: ReactNode }) {
       } else {
         toast.error("Unexpected error occurred!");
       }
+      return false;
     }
   };
 
+  // Delete Folder
   const deleteFolder = async (id: string) => {
     try {
       // Send Request To Backend

@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Create Folder
 export async function POST(req: NextRequest) {
   // Get Name From Frontend
-  const { name } = await req.json();
+  const { name, folderId } = await req.json();
 
   // Get UserId Form Clerk
   const { userId } = await auth();
@@ -13,6 +13,18 @@ export async function POST(req: NextRequest) {
   // Check UserId
   if (!userId) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  // Duplicate Check
+  const existingFolder = await prisma.folder.findFirst({
+    where: { userId, name },
+  });
+
+  if (existingFolder) {
+    return NextResponse.json(
+      { message: "Folder with this name already exists" },
+      { status: 400 }
+    );
   }
 
   try {

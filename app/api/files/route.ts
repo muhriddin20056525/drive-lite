@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Upload File
 export async function POST(req: NextRequest) {
   // Get Data From Frontend
-  const { name, type, url, size } = await req.json();
+  const { name, type, url, size, folderId } = await req.json();
 
   // Get UserId Form Clerk
   const { userId } = await auth();
@@ -15,8 +15,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Check All Fileds
+  // Duplicate Check
+  const existingFile = await prisma.file.findFirst({
+    where: { userId, name },
+  });
 
+  if (existingFile) {
+    return NextResponse.json(
+      { message: "File with this name already exists" },
+      { status: 400 }
+    );
+  }
+
+  // Check All Fileds
   if (!name || !type || !url || !size) {
     return NextResponse.json(
       { message: "All fields (name, type, url, size) are required" },
@@ -33,6 +44,7 @@ export async function POST(req: NextRequest) {
         type,
         url,
         size,
+        folderId,
       },
     });
 
@@ -50,7 +62,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Get All Files
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   // Get User Id From Clerk
   const { userId } = await auth();
 
