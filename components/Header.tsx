@@ -1,19 +1,16 @@
 "use client";
 
-import { useSidebar } from "@/context/SidebarContext";
+import { useSidebar } from "@/store/useSidebarStore";
 import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignOutButton,
   UserButton,
   useUser,
 } from "@clerk/nextjs";
 import { MenuIcon, Search } from "lucide-react";
 import Link from "next/link";
-import CreateFolderModal from "./CreateFolderModal";
 import { useState } from "react";
-import FileUploadModal from "./FileUploadModal";
 
 function Header() {
   // State For Toggle Create Folder Modal
@@ -69,14 +66,14 @@ function Header() {
           <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
             <button
               onClick={() => setOpenFolderModal(true)}
-              className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+              className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
             >
               New Folder
             </button>
 
             <button
               onClick={() => setOpenFileUploadModal(true)}
-              className="bg-skyflare text-white border-none py-2.5 px-3.5 font-semibold rounded-[12px] cursor-pointer"
+              className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
             >
               Upload
             </button>
@@ -85,7 +82,7 @@ function Header() {
 
         <SignedOut>
           <SignInButton mode="modal">
-            <button className="border border-graphite bg-transparent text-white py-2.5 px-6.5 font-semibold rounded-[12px] cursor-pointer hover:bg-abyss">
+            <button className="border border-graphite bg-transparent text-white py-2.5 px-6.5 font-semibold rounded-md cursor-pointer hover:bg-abyss">
               Login
             </button>
           </SignInButton>
@@ -95,16 +92,6 @@ function Header() {
           <UserButton />
         </SignedIn>
       </div>
-
-      {/* Create Folder Modal */}
-      {openFolderModal && (
-        <CreateFolderModal setOpenFolderModal={setOpenFolderModal} />
-      )}
-
-      {/* File Upload Modal */}
-      {openFileUploadModal && (
-        <FileUploadModal setOpenFileUploadModal={setOpenFileUploadModal} />
-      )}
     </header>
   );
 }

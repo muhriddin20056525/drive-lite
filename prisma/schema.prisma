@@ -14,33 +14,38 @@ datasource db {
 }
 
 model Folder {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   name      String
-  userId    String
-  type      String
+  ownerId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  File      File[]
+  isStarred Boolean  @default(false)
+  isTrashed Boolean  @default(false)
+
+  files File[]
+
+  @@index([ownerId])
+  @@index([ownerId, isTrashed])
+  @@index([ownerId, isStarred])
 }
 
 model File {
-  id        Int      @id @default(autoincrement())
-  name      String
-  type      String
-  url       String
-  size      Int
-  userId    String
-  folderId  Int?
-  folder    Folder?  @relation(fields: [folderId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  id       String  @id @default(uuid())
+  name     String
+  url      String
+  type     String
+  size     BigInt
+  ownerId  String
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
-model Favorites {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  type      String
-  itemId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  isStarred Boolean  @default(false)
+  isTrashed Boolean  @default(false)
+
+  @@index([ownerId])
+  @@index([ownerId, folderId])
+  @@index([ownerId, isTrashed])
+  @@index([ownerId, isStarred])
 }
