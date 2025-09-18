@@ -14,13 +14,16 @@ datasource db {
 }
 
 model Folder {
-  id        String   @id @default(uuid())
-  name      String
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isStarred Boolean  @default(false)
-  isTrashed Boolean  @default(false)
+  id      String @id @default(uuid())
+  name    String
+  ownerId String
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastAccessedAt DateTime?
+
+  isStarred Boolean @default(false)
+  isTrashed Boolean @default(false)
 
   files File[]
 
@@ -34,15 +37,17 @@ model File {
   name     String
   url      String
   type     String
-  size     BigInt
+  size     Int
   ownerId  String
   folderId String?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isStarred Boolean  @default(false)
-  isTrashed Boolean  @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastAccessedAt DateTime?
+
+  isStarred Boolean @default(false)
+  isTrashed Boolean @default(false)
 
   @@index([ownerId])
   @@index([ownerId, folderId])
