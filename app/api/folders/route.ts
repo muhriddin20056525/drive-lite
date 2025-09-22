@@ -87,7 +87,11 @@ export async function POST(req: Request) {
 
     // Check Duplicate Folder
     const existing = await prisma.folder.findFirst({
-      where: { ownerId: userId, name: trimmedName, isTrashed: false },
+      where: {
+        ownerId: userId,
+        name: trimmedName,
+        isTrashed: false,
+      },
     });
 
     // Return Already Existing Error
@@ -100,7 +104,7 @@ export async function POST(req: Request) {
 
     // Create Folder
     const folder = await prisma.folder.create({
-      data: { name: trimmedName, ownerId: userId },
+      data: { name: trimmedName, ownerId: userId, lastAccessedAt: new Date() },
     });
 
     return NextResponse.json(

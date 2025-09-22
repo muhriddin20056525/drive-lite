@@ -35,7 +35,7 @@ export default function RootLayout({
           <Header />
           <Sidebar />
 
-          <div className="absolute top-16 md:left-64 p-5 w-full md:w-[calc(100vw-276px)]">
+          <div className="absolute top-16 md:left-64 p-5 w-full md:w-[calc(100vw-276px)] h-[calc(100vh-64px)]">
             {children}
           </div>
           <Toaster />

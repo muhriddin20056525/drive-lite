@@ -47,7 +47,7 @@ export async function GET(req: Request) {
     } else {
       // Get All files
       files = await prisma.file.findMany({
-        where: { ownerId: userId, isTrashed: false },
+        where: { ownerId: userId, isTrashed: false, folderId: null },
         orderBy: { createdAt: "desc" },
       });
     }
@@ -97,9 +97,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create Folder
+    // Create File
     const file = await prisma.file.create({
-      data: { ownerId: userId, name, url, type, size, folderId },
+      data: {
+        ownerId: userId,
+        name,
+        url,
+        type,
+        size,
+        folderId,
+        lastAccessedAt: new Date(),
+      },
     });
 
     return NextResponse.json(

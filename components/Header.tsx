@@ -10,6 +10,7 @@ import {
 } from "@clerk/nextjs";
 import { MenuIcon, Search } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 function Header() {
@@ -18,6 +19,11 @@ function Header() {
   // State For Toggle File Upload Modal
   const [openFileUploadModal, setOpenFileUploadModal] =
     useState<boolean>(false);
+
+  // Pathname for Showing Modal Buttons
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const isFolderDetail = pathname.startsWith("/folders/");
 
   // For Toggle Responsive Sidebar
   const { toggleSidebar } = useSidebar();
@@ -62,22 +68,22 @@ function Header() {
 
       {/* Actions */}
       <div className="flex items-center gap-2.5">
-        {user && (
+        {user && isHome && (
           <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
-            <button
-              onClick={() => setOpenFolderModal(true)}
-              className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
-            >
+            <button className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
               New Folder
             </button>
 
-            <button
-              onClick={() => setOpenFileUploadModal(true)}
-              className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
-            >
-              Upload
+            <button className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
+              File Upload
             </button>
           </div>
+        )}
+
+        {isFolderDetail && (
+          <button className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
+            File Upload
+          </button>
         )}
 
         <SignedOut>

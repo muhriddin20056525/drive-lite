@@ -19,6 +19,10 @@
   background: linear-gradient(180deg, #0f1620, #131c28);
 }
 
+.bg-card-icon {
+  background: linear-gradient(135deg, #1f2937, #10b981);
+}
+
 .bg-gradient-hover:hover {
   background: linear-gradient(180deg, var(--color-storm), var(--color-abyss));
 }
