@@ -5,6 +5,7 @@ import DriveItems from "@/components/DriveItems";
 import { useDriveStore } from "@/store/useDriveStore";
 import { IFolder } from "@/types";
 import { useUser } from "@clerk/nextjs";
+import { Loader, Loader2 } from "lucide-react";
 import React, { useEffect } from "react";
 
 function Home() {
@@ -21,19 +22,43 @@ function Home() {
     }
   }, [user, isLoaded]);
 
+  // Check Auth
+  if (!user && isLoaded) return <AuthGuard />;
+
+  // Check Loader
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center pt-3">
+        <Loader2 className="animate-spin" color="white" size={34} />
+      </div>
+    );
+  }
+
+  // If Emty Files And Folders Modal
+  if (!loading && folders.length === 0 && files.length === 0) {
+    return (
+      <div className="flex items-center justify-center pt-3">
+        <p className="text-steel text-lg font-semibold">
+          📂 No files or folders found
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {/* Check Auth */}
-      {!user && isLoaded && <AuthGuard />}
-
       {/* Show Folders */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-5">
+      <div
+        className={`grid grid-cols-1 xl:grid-cols-3 gap-5 ${
+          folders.length > 0 && "mb-10"
+        }`}
+      >
         {folders.length > 0 &&
           folders.map((item) => <DriveItems item={item} key={item.id} />)}
       </div>
 
       {/* Show Files */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         {files.length > 0 &&
           files.map((item) => <DriveItems item={item} key={item.id} />)}
       </div>

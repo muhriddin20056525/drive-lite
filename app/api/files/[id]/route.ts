@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { IFile } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
@@ -36,61 +37,67 @@ export async function GET(
 }
 
 // Edit File
-export async function PUT(
+export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  // Get User Id
+  const { name, isStarred, isTrashed } = await req.json();
+
+  // Get User Id from auth
   const { userId } = await auth();
 
-  // Check User Id
+  // Check User
   if (!userId) {
     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
-  // Get File Data From Forntend
-  const { name, url, type, size, folderId, isStarred, isTrashed } =
-    await req.json();
+  // Build New Object For Update File
+  const updateData: Partial<IFile> = {};
 
-  // Check File Data
-  if (
-    !name.trim() ||
-    !url.trim() ||
-    !type.trim() ||
-    !size ||
-    isStarred == undefined ||
-    isTrashed == undefined
-  ) {
-    return NextResponse.json({ error: "All Fields Required" }, { status: 400 });
-  }
+  // Check req.json Data
+  if (name !== undefined) updateData.name = name;
+  if (isStarred !== undefined) updateData.isStarred = isStarred;
+  if (isTrashed !== undefined) updateData.isTrashed = isTrashed;
 
   try {
-    // Check Duplicate File
-    const existing = await prisma.file.findFirst({
-      where: { ownerId: userId, name, isTrashed: false },
-    });
+    // Find File With ID
+    const file = await prisma.file.findUnique({ where: { id: params.id } });
 
-    // Return Already Existing Error
-    if (existing) {
-      return NextResponse.json(
-        { error: "File with this name already exists" },
-        { status: 409 } // Conflict
-      );
+    // Check File
+    if (!file) {
+      return NextResponse.json({ error: "File Not Found" }, { status: 404 });
+    }
+
+    // If change Filename
+    if (name !== undefined && name !== file.name) {
+      const existingFile = await prisma.file.findFirst({
+        where: {
+          ownerId: userId,
+          name,
+          NOT: { id: params.id },
+        },
+      });
+
+      if (existingFile) {
+        return NextResponse.json(
+          { error: "File with this name already exists" },
+          { status: 409 }
+        );
+      }
     }
 
     // Update File
     const updatedFile = await prisma.file.update({
-      where: { ownerId: userId, id: params.id },
-      data: { name, url, type, size, folderId, isStarred, isTrashed },
+      where: { id: params.id, ownerId: userId },
+      data: updateData,
     });
 
-    // Return Response
-    return NextResponse.json(
-      { message: "Update File Successfully!", file: updatedFile },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      message: "File Upadated Successfully!",
+      file: updatedFile,
+    });
   } catch (error) {
-    console.error("[FILES_PUT]", error);
+    console.error("[FILES_PATCH]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
