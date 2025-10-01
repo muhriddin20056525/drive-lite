@@ -1,15 +1,23 @@
 "use client";
 
 import { sidebarLinks } from "@/constants";
+import { useDriveStore } from "@/store/useDriveStore";
 import { useSidebar } from "@/store/useSidebarStore";
+import { formatFileSize } from "@/utils/formatSize";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 function Sidebar() {
   const pathName = usePathname();
 
   const { isOpen } = useSidebar();
+
+  const { totalSize, calculateSize } = useDriveStore();
+
+  useEffect(() => {
+    calculateSize();
+  }, []);
 
   return (
     <aside
@@ -43,7 +51,7 @@ function Sidebar() {
 
       {/* Storage Button */}
       <button className="border border-graphite bg-abyss text-white py-2.5 w-full font-semibold rounded-[12px] bg-gradient-dark">
-        Your Used 500 MB
+        Your Used {formatFileSize(totalSize)}
       </button>
     </aside>
   );

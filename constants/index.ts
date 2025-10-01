@@ -12,18 +12,18 @@ export const sidebarLinks = [
     path: "/starred",
   },
   {
-    label: "Recent",
-    icon: Clock5,
-    path: "/recent",
-  },
-  {
     label: "Trash",
     icon: Trash,
     path: "/trash",
   },
   {
+    label: "Recent",
+    icon: Clock5,
+    path: "/recent",
+  },
+  {
     label: "Storage",
     icon: Cloud,
-    path: "/cloud",
+    path: "/storage",
   },
 ];

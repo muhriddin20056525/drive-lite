@@ -3,7 +3,7 @@ import { IFolder } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Get Single Folder
+// Get Files In Folder
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
@@ -20,7 +20,9 @@ export async function GET(
     // Find Folder By ID
     const folder = await prisma.folder.findFirst({
       where: { ownerId: userId, id: params.id },
-      include: { files: true },
+      include: {
+        files: { where: { isTrashed: false }, orderBy: { createdAt: "desc" } },
+      },
     });
 
     // Return Response
@@ -93,8 +95,20 @@ export async function PATCH(
       data: updateData,
     });
 
+    // Dynamic message
+    let message = "Folder updated successfully!";
+    if (isTrashed !== undefined) {
+      message = isTrashed
+        ? "Folder moved to trash!"
+        : "Folder restored from trash!";
+    } else if (isStarred !== undefined) {
+      message = isStarred ? "Folder starred!" : "Folder unstarred!";
+    } else if (name !== undefined && name !== folder.name) {
+      message = "Foldername updated successfully!";
+    }
+
     return NextResponse.json({
-      message: "Folder Upadated Successfully!",
+      message,
       folder: updatedFolder,
     });
   } catch (error) {
@@ -108,7 +122,7 @@ export async function PATCH(
 
 // Delete Folder
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {

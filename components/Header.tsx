@@ -10,26 +10,28 @@ import {
 } from "@clerk/nextjs";
 import { MenuIcon, Search } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
+import CreateFolderModal from "./CreateFolderModal";
+import CreateFileModal from "./CreateFileModal";
 
 function Header() {
-  // State For Toggle Create Folder Modal
+  // Folder Modal State
   const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
-  // State For Toggle File Upload Modal
-  const [openFileUploadModal, setOpenFileUploadModal] =
-    useState<boolean>(false);
+  const [openFileModal, setOpenFileModal] = useState<boolean>(false);
 
   // Pathname for Showing Modal Buttons
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const isFolderDetail = pathname.startsWith("/folders/");
+  const isFolderDetail = pathname.startsWith("/folder/");
 
   // For Toggle Responsive Sidebar
   const { toggleSidebar } = useSidebar();
 
   // Get User From Clerk
   const { user } = useUser();
+
+  const { id: folderId } = useParams();
 
   return (
     <header className="h-16 w-full fixed top-0 left-0 bg-gradient-dark border border-graphite shadow-elevated z-50 px-5 flex items-center justify-between gap-5">
@@ -70,18 +72,27 @@ function Header() {
       <div className="flex items-center gap-2.5">
         {user && isHome && (
           <div className="flex items-center gap-2.5 fixed bottom-3 right-3 md:static">
-            <button className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
+            <button
+              onClick={() => setOpenFolderModal(!openFolderModal)}
+              className="border border-graphite bg-abyss text-white py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
+            >
               New Folder
             </button>
 
-            <button className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
+            <button
+              onClick={() => setOpenFileModal(!openFileModal)}
+              className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
+            >
               File Upload
             </button>
           </div>
         )}
 
         {isFolderDetail && (
-          <button className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer">
+          <button
+            onClick={() => setOpenFileModal(!openFileModal)}
+            className="bg-azure-light text-white border-none py-2.5 px-3.5 font-semibold rounded-md cursor-pointer"
+          >
             File Upload
           </button>
         )}
@@ -98,6 +109,19 @@ function Header() {
           <UserButton />
         </SignedIn>
       </div>
+
+      {/* Create Folder Modal */}
+      <CreateFolderModal
+        isOpen={openFolderModal}
+        onClose={() => setOpenFolderModal(false)}
+      />
+
+      {/* Create Folder Modal */}
+      <CreateFileModal
+        isOpen={openFileModal}
+        folderId={isFolderDetail ? (folderId as string) : undefined}
+        onClose={() => setOpenFileModal(false)}
+      />
     </header>
   );
 }

@@ -3,21 +3,23 @@
 import { DriveItemsType } from "@/types";
 import DriveItemIcon from "./DriveItemIcon";
 import { formatFileSize } from "@/utils/formatSize";
-import { Edit, Star, Trash2 } from "lucide-react";
+import { ArchiveRestore, Edit, Star, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDriveStore } from "@/store/useDriveStore";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 type DriveItemsProps = {
   item: DriveItemsType;
+  status?: "drive" | "starred" | "trashed" | "recent";
 };
 
-function DriveItems({ item }: DriveItemsProps) {
+function DriveItems({ item, status }: DriveItemsProps) {
   // Get Edit Input Value
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState<string>(item.name);
 
   // Get Edit And Delete Function From useDriveStore
-  const { deleteData, updateData } = useDriveStore();
+  const { deleteData, updateData, markAsAccessed } = useDriveStore();
 
   // Check Edit State
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -57,6 +59,8 @@ function DriveItems({ item }: DriveItemsProps) {
     // Call updateData fuction from zustand
     updateData(id, type, { name });
 
+    markAsAccessed(id, type);
+
     // Hide edit input
     setIsEdit(false);
   };
@@ -68,6 +72,7 @@ function DriveItems({ item }: DriveItemsProps) {
     isStarred: boolean
   ) => {
     updateData(id, type, { isStarred: !isStarred });
+    markAsAccessed(id, type);
   };
 
   // Trashed File And Folder
@@ -76,7 +81,8 @@ function DriveItems({ item }: DriveItemsProps) {
     type: "file" | "folder",
     isTrashed: boolean
   ) => {
-    updateData(id, type, { isTrashed });
+    updateData(id, type, { isTrashed, isStarred: false });
+    markAsAccessed(id, type);
   };
 
   return (
@@ -94,7 +100,20 @@ function DriveItems({ item }: DriveItemsProps) {
       {/* Body */}
       <div>
         {!isEdit ? (
-          <h2 className="text-xl text-skyfog font-semibold">{item.name}</h2>
+          !isFile ? (
+            status !== "trashed" ? (
+              <Link
+                href={`/folder/${item.id}`}
+                className="text-xl text-skyfog font-semibold"
+              >
+                {item.name}
+              </Link>
+            ) : (
+              <h2 className="text-xl text-skyfog font-semibold">{item.name}</h2>
+            )
+          ) : (
+            <h2 className="text-xl text-skyfog font-semibold">{item.name}</h2>
+          )
         ) : (
           <div className="flex items-center gap-2">
             <input
@@ -112,6 +131,7 @@ function DriveItems({ item }: DriveItemsProps) {
             </button>
           </div>
         )}
+
         <p className="text-steel font-medium">
           {new Date(item.createdAt).toLocaleDateString()}
           {isFile ? <span> - {formatFileSize(item.size)}</span> : null}
@@ -120,36 +140,58 @@ function DriveItems({ item }: DriveItemsProps) {
 
       {/* Actions */}
       <div className="hidden group-hover:flex items-center gap-1 absolute top-2 right-2">
-        <button
-          onClick={() => setIsEdit(true)}
-          className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
-        >
-          <Edit width={15} height={15} className="text-skyfog" />
-        </button>
-        <button
-          onClick={() =>
-            handleStarred(item.id, isFile ? "file" : "folder", item.isStarred)
-          }
-          className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
-        >
-          <Star
-            width={15}
-            height={15}
-            className={
-              item.isStarred
-                ? "fill-amber-400 stroke-amber-400"
-                : "stroke-skyfog"
+        {status === "trashed" ? (
+          <button
+            onClick={() =>
+              handleTrashed(item.id, isFile ? "file" : "folder", false)
             }
-          />
-        </button>
-        <button
-          onClick={() =>
-            handleTrashed(item.id, isFile ? "file" : "folder", true)
-          }
-          className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
-        >
-          <Trash2 width={15} height={15} className="text-skyfog" />
-        </button>
+            className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
+          >
+            <ArchiveRestore width={15} height={15} className="text-skyfog" />
+          </button>
+        ) : status === "recent" ? null : (
+          <>
+            <button
+              onClick={() => setIsEdit(true)}
+              className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
+            >
+              <Edit width={15} height={15} className="text-skyfog" />
+            </button>
+            <button
+              onClick={() =>
+                handleStarred(
+                  item.id,
+                  isFile ? "file" : "folder",
+                  item.isStarred
+                )
+              }
+              className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
+            >
+              <Star
+                width={15}
+                height={15}
+                className={
+                  item.isStarred
+                    ? "fill-amber-400 stroke-amber-400"
+                    : "stroke-skyfog"
+                }
+              />
+            </button>
+          </>
+        )}
+
+        {status !== "recent" && (
+          <button
+            onClick={() =>
+              status === "trashed"
+                ? deleteData(item.id, isFile ? "file" : "folder")
+                : handleTrashed(item.id, isFile ? "file" : "folder", true)
+            }
+            className="bg-steel/60 w-6 h-6 flex items-center justify-center rounded-xs cursor-pointer"
+          >
+            <Trash2 width={15} height={15} className="text-skyfog" />
+          </button>
+        )}
       </div>
 
       {/* File Extname */}

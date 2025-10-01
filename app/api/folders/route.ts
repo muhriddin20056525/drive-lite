@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     } else if (filter === "trash") {
       // Get Trash Folders
       folders = await prisma.folder.findMany({
-        where: { ownerId: userId, isTrashed: true },
+        where: { ownerId: userId, isTrashed: true, isStarred: false },
         orderBy: { updatedAt: "desc" },
         include: { files: true },
       });
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
     } else if (filter === "recent") {
       // Get Recent Folders
       folders = await prisma.folder.findMany({
-        where: { ownerId: userId, isStarred: false },
+        where: { ownerId: userId },
         orderBy: { lastAccessedAt: "desc" },
         take: 10,
         include: { files: true },

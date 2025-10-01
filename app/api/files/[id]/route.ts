@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { IFile } from "@/types";
+import { supabase } from "@/utils/supabase";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
@@ -92,8 +93,20 @@ export async function PATCH(
       data: updateData,
     });
 
+    // Dynamic message
+    let message = "File updated successfully!";
+    if (isTrashed !== undefined) {
+      message = isTrashed
+        ? "File moved to trash!"
+        : "File restored from trash!";
+    } else if (isStarred !== undefined) {
+      message = isStarred ? "File starred!" : "File unstarred!";
+    } else if (name !== undefined && name !== file.name) {
+      message = "Filename updated successfully!";
+    }
+
     return NextResponse.json({
-      message: "File Upadated Successfully!",
+      message,
       file: updatedFile,
     });
   } catch (error) {
@@ -119,10 +132,34 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
     }
 
+    // Find File
+    const file = await prisma.file.findUnique({
+      where: { id: params.id },
+    });
+
+    // Check File
+    if (!file) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
     // File Delete
     const deletedFile = await prisma.file.delete({
       where: { ownerId: userId, id: params.id },
     });
+
+    const filePath = file.url.split(
+      "/storage/v1/object/public/drive-storage/"
+    )[1];
+
+    if (filePath) {
+      const { error: storageError } = await supabase.storage
+        .from("drive-storage")
+        .remove([filePath]);
+
+      if (storageError) {
+        console.error("[SUPABASE_DELETE_ERROR]", storageError.message);
+      }
+    }
 
     return NextResponse.json(
       { message: "Delete File Successfully!", file: deletedFile },
