@@ -8,17 +8,22 @@ import {
   UserButton,
   useUser,
 } from "@clerk/nextjs";
-import { MenuIcon, Search } from "lucide-react";
+import { MenuIcon, Search, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import CreateFolderModal from "./CreateFolderModal";
 import CreateFileModal from "./CreateFileModal";
+import { useDriveStore } from "@/store/useDriveStore";
+import toast from "react-hot-toast";
 
 function Header() {
   // Folder Modal State
   const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
   const [openFileModal, setOpenFileModal] = useState<boolean>(false);
+
+  // Get Search Input Value
+  const [searchValue, setSearchValue] = useState("");
 
   // Pathname for Showing Modal Buttons
   const pathname = usePathname();
@@ -27,11 +32,22 @@ function Header() {
 
   // For Toggle Responsive Sidebar
   const { toggleSidebar } = useSidebar();
+  // Get Search Function
+  const { fetchSearchData } = useDriveStore();
 
   // Get User From Clerk
   const { user } = useUser();
 
   const { id: folderId } = useParams();
+
+  const handleSearch = () => {
+    if (!searchValue.trim()) {
+      toast.error("Search Value Is Required");
+      return;
+    }
+
+    fetchSearchData(searchValue);
+  };
 
   return (
     <header className="h-16 w-full fixed top-0 left-0 bg-gradient-dark border border-graphite shadow-elevated z-50 px-5 flex items-center justify-between gap-5">
@@ -54,17 +70,19 @@ function Header() {
       </div>
 
       {/* Search Bar */}
-      <div className="hidden md:flex items-center border border-graphite grow rounded-2xl gap-2.5 bg-storm py-2.5 px-3">
-        <Search color="white" width={16} height={16} />
-
+      <div className="hidden md:flex items-center border border-graphite grow rounded-xl gap-2.5 bg-storm py-1.5 px-3">
         <input
           type="text"
           placeholder="Search folder or file"
           className="grow outline-none bg-transparent text-skyfog"
+          onChange={(e) => setSearchValue(e.target.value)}
         />
 
-        <div className="border border-graphite text-xs text-steel py-1 px-1.5 rounded-[8px]">
-          Ctrl /
+        <div
+          className="border border-graphite text-xs text-steel w-7 h-7 flex items-center justify-center rounded-[8px]"
+          onClick={handleSearch}
+        >
+          <Search color="white" width={16} height={16} />
         </div>
       </div>
 

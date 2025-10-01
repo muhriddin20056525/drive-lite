@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDriveStore } from "@/store/useDriveStore";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { usePreviewStore } from "@/store/usePreviewStore";
 
 type DriveItemsProps = {
   item: DriveItemsType;
@@ -20,6 +21,9 @@ function DriveItems({ item, status }: DriveItemsProps) {
 
   // Get Edit And Delete Function From useDriveStore
   const { deleteData, updateData, markAsAccessed } = useDriveStore();
+
+  // Preview Modal Actions
+  const { openPreview } = usePreviewStore();
 
   // Check Edit State
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -112,7 +116,12 @@ function DriveItems({ item, status }: DriveItemsProps) {
               <h2 className="text-xl text-skyfog font-semibold">{item.name}</h2>
             )
           ) : (
-            <h2 className="text-xl text-skyfog font-semibold">{item.name}</h2>
+            <h2
+              className="text-xl text-skyfog font-semibold cursor-pointer"
+              onClick={() => isFile && openPreview(item)}
+            >
+              {item.name}
+            </h2>
           )
         ) : (
           <div className="flex items-center gap-2">

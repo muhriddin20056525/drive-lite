@@ -45,6 +45,7 @@ interface DriveState {
   ) => Promise<void>;
 
   calculateSize: () => Promise<void>;
+  fetchSearchData: (q: string) => Promise<void>;
 }
 
 export const useDriveStore = create<DriveState>((set, get) => ({
@@ -446,6 +447,15 @@ export const useDriveStore = create<DriveState>((set, get) => ({
       } else {
         toast.error("Unexpected error occurred");
       }
+    }
+  },
+
+  fetchSearchData: async (q: string) => {
+    try {
+      const { data } = await axios.get(`/api/search?q=${q}`);
+      set({ folders: data.folders || [], files: data.files || [] });
+    } catch (error) {
+      console.error("[SEARCH_FETCH_ERROR]", error);
     }
   },
 }));
