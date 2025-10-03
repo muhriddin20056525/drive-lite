@@ -33,20 +33,33 @@ function Header() {
   // For Toggle Responsive Sidebar
   const { toggleSidebar } = useSidebar();
   // Get Search Function
-  const { fetchSearchData } = useDriveStore();
+  const { fetchSearchData, fetchData } = useDriveStore();
 
   // Get User From Clerk
   const { user } = useUser();
 
   const { id: folderId } = useParams();
 
-  const handleSearch = () => {
+  // Search Function
+  const handleSearch = async () => {
+    //  IF Inout Empty Showing Main Data
     if (!searchValue.trim()) {
-      toast.error("Search Value Is Required");
+      await fetchData();
       return;
     }
 
+    // Search Data
     fetchSearchData(searchValue);
+  };
+
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+
+    // Show Main Data
+    if (!value.trim()) {
+      await fetchData();
+    }
   };
 
   return (
@@ -75,7 +88,7 @@ function Header() {
           type="text"
           placeholder="Search folder or file"
           className="grow outline-none bg-transparent text-skyfog"
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={handleInputChange}
         />
 
         <div

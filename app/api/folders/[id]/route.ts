@@ -44,7 +44,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { name, isStarred, isTrashed } = await req.json();
+  let { name, isStarred, isTrashed } = await req.json();
 
   // Get User Id from auth
   const { userId } = await auth();
@@ -52,6 +52,17 @@ export async function PATCH(
   // Check User
   if (!userId) {
     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+  }
+
+  // Trim Name
+  if (typeof name === "string") {
+    name = name.trim();
+    if (!name) {
+      return NextResponse.json(
+        { error: "Folder name cannot be empty" },
+        { status: 400 }
+      );
+    }
   }
 
   // Build New Object For Update Folder
